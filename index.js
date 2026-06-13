@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session, globalShortcut } = require('electron');
+const { app, BrowserWindow, session, globalShortcut, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -67,6 +67,14 @@ const createWindow = () => {
     const win = new BrowserWindow(windowOptions);
     win.setMenu(null);
     win.loadURL('https://linear.app/login');
+
+    const authPatterns = ['/oauth', '/auth', '/login', '/signin', '/sso', '/saml', '/callback'];
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        const isAuth = authPatterns.some(p => url.includes(p));
+        if (isAuth) return { action: 'allow' };
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
 
     win.on('close', () => {
         saveWindowState(win.getBounds());
