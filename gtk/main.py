@@ -22,6 +22,23 @@ ALLOWED_LINEAR_PERMISSIONS = (
 )
 STATE_PATH = os.path.join(GLib.get_user_state_dir(), 'linear-linux', 'window-state.json')
 
+MIDDLE_CLICK_MESSAGE_HANDLER = 'linearLinuxMiddleClick'
+# WebKitGTK doesn't surface middle-click on a link as decide-policy/create the way
+# Chromium does (confirmed by live tracing, not assumption) — so it's caught here via
+# the DOM's own auxclick event and relayed back to the UI process as a script message.
+MIDDLE_CLICK_SCRIPT = f"""
+(function() {{
+    document.addEventListener('auxclick', function(event) {{
+        if (event.button !== 1) return;
+        var el = event.target;
+        while (el && el.tagName !== 'A') {{ el = el.parentElement; }}
+        if (!el || !el.href) return;
+        event.preventDefault();
+        window.webkit.messageHandlers.{MIDDLE_CLICK_MESSAGE_HANDLER}.postMessage(el.href);
+    }}, true);
+}})();
+"""
+
 
 def is_linear_host(hostname):
     return hostname == 'linear.app' or (hostname or '').endswith('.linear.app')
@@ -132,6 +149,19 @@ class LinearWindow(Adw.ApplicationWindow):
         webview.connect('notify::title', self.on_title_changed)
         webview.connect('enter-fullscreen', lambda *_: (self.fullscreen(), False)[1])
         webview.connect('leave-fullscreen', lambda *_: (self.unfullscreen(), False)[1])
+
+        content_manager = webview.get_user_content_manager()
+        content_manager.register_script_message_handler(MIDDLE_CLICK_MESSAGE_HANDLER)
+        content_manager.connect(
+            f'script-message-received::{MIDDLE_CLICK_MESSAGE_HANDLER}',
+            lambda _mgr, js_value: self.open_link(js_value.to_string(), webview),
+        )
+        content_manager.add_script(WebKit.UserScript.new(
+            MIDDLE_CLICK_SCRIPT,
+            WebKit.UserContentInjectedFrames.ALL_FRAMES,
+            WebKit.UserScriptInjectionTime.START,
+            None, None,
+        ))
 
     def new_tab(self, url=HOME_URL):
         webview = WebKit.WebView()
