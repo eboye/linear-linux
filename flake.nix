@@ -7,18 +7,18 @@
 
   outputs = { self, nixpkgs }:
     let
-      version = "0.2.5";
+      version = "1.0.0";
 
       # NOTE: version/hash are auto-patched by .github/workflows/release.yml on every
       # release cut from this repo; the values below are stale until the next release.
       sources = {
         x86_64-linux = {
           url = "https://github.com/eboye/linear-linux/releases/download/v${version}/linear-linux-${version}-x86_64.AppImage";
-          hash = "sha256-NBmfXyrmtBccOLLzBiwbkCyA8IGxtY+AQIgAVxfrank="; # x86_64
+          hash = "sha256-L4zWDaK5NtyGMWdFzPORPJeEcT2DjH9b7b5pV3BDKlg="; # x86_64
         };
         aarch64-linux = {
           url = "https://github.com/eboye/linear-linux/releases/download/v${version}/linear-linux-${version}-arm64.AppImage";
-          hash = "sha256-nNDo7cq05as0qoEbd1UkOG+s8PzFZxnovcqLsg11RlU="; # aarch64
+          hash = "sha256-B/lEn11bWUV+SNQNnYwAM81/8NoEe5lYDfVoJqOsm+8="; # aarch64
         };
       };
 
