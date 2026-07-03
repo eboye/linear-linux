@@ -131,3 +131,4 @@ dist
 
 # Nix build output
 result
+__pycache__/
