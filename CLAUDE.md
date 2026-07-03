@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Linear for Linux is an unofficial Electron wrapper that loads linear.app (https://linear.app) directly
-in a BrowserWindow — there is no custom UI beyond window/OS-integration behavior. The entire application
-logic lives in a single file, `index.js`.
+Linear for Linux is an unofficial Electron wrapper around linear.app (https://linear.app). The app is a
+single frameless `BrowserWindow` hosting a custom tabbed browser shell: a `chrome/` HTML/CSS/JS UI
+(titlebar + tab strip + window controls) rendered in one `WebContentsView`, and one `WebContentsView` per
+open Linear tab. All main-process logic lives in `index.js`.
 
 ## Commands
 
@@ -19,21 +20,34 @@ There is no lint or test tooling configured in this repo.
 
 ## Architecture
 
-Everything happens in `index.js` (~120 lines):
+`index.js` is the main process. `chrome/` is the custom shell UI (not to be confused with Google Chrome):
+`index.html`/`chrome.css`/`chrome.js` render the titlebar/tab-strip, and `preload.js` exposes a
+`window.chrome` API (new/close/switch tab, minimize/maximize/close) into that UI via `contextBridge` — this
+preload is only attached to the chrome view, never to Linear tab content.
 
-- **Window state persistence** — window size/position is saved to
-  `<userData>/window-state.json` on close and restored on next launch (`loadWindowState`/`saveWindowState`).
-- **External link handling** — `setWindowOpenHandler` only allows in-app navigation for auth-flow URLs
-  (matched against `/oauth`, `/auth`, `/login`, `/signin`, `/sso`, `/saml`, `/callback`); every other
-  URL is routed to the system browser via `shell.openExternal` and denied in-app. When changing link
-  behavior, update the `authPatterns` list rather than adding ad hoc checks elsewhere.
-- **Notifications** — the permission handler only grants `notifications` for requests whose
-  `requestingUrl` starts with `https://linear.app`; all other permission requests are denied.
-- **New-window shortcut** — `CommandOrControl+Shift+N` is registered/unregistered dynamically on
-  `browser-window-focus`/`browser-window-blur` rather than globally at startup, so it doesn't take over
-  the shortcut system-wide when the app isn't focused.
-- **Security defaults** — `nodeIntegration: false`, `contextIsolation: true`, no preload script. Keep
-  new BrowserWindow instances consistent with these defaults.
+- **Tabs** — each tab is a `WebContentsView` added to `mainWin.contentView`; only the active tab's view is
+  attached (others stay detached-but-alive). `createTab`/`closeTab`/`switchTab` in `index.js` own this
+  lifecycle; `layout()` sizes the chrome view (top `CHROME_HEIGHT` px) and the active tab view (remaining
+  space) on window resize.
+- **Link routing** — `isAuthUrl`/`isLinearUrl` classify target URLs for both `setWindowOpenHandler` and
+  `will-navigate` on every tab's `webContents`: auth-flow URLs (matched against `/oauth`, `/auth`,
+  `/login`, `/signin`, `/sso`, `/saml`, `/callback`, or the `linear.app` host itself) are allowed to open
+  as a native popup window (for OAuth/SSO redirects); other `linear.app` URLs open as a new tab via
+  `createTab`; everything else is routed to the system browser via `shell.openExternal` and denied in-app.
+  Third-party SSO/SAML providers can live at arbitrary customer-controlled hostnames, so `isAuthUrl` can
+  only check the path (not the host) for non-`linear.app` URLs — a known, accepted tradeoff.
+- **Notifications** — the permission handler only grants permissions in `ALLOWED_LINEAR_PERMISSIONS`
+  (`notifications`, `clipboard-read`, `media`, `display-capture`, `fullscreen`) for requests whose
+  `requestingUrl` starts with `https://linear.app`; everything else is denied.
+- **New-tab shortcut** — `CommandOrControl+Shift+N` is a global shortcut, registered/unregistered on
+  `browser-window-focus`/`browser-window-blur` so it doesn't take over the shortcut system-wide when the
+  app isn't focused. `Ctrl/Cmd+T` (new tab) and `Ctrl/Cmd+W` (close tab) are handled locally via
+  `before-input-event` on the chrome view and every tab's `webContents` instead of `globalShortcut`,
+  since those are common shortcuts in other apps and must not be hijacked system-wide.
+- **Window chrome** — `mainWin` is created with `frame: false`; minimize/maximize/close are implemented in
+  `chrome/chrome.js` calling into `chrome/preload.js`'s IPC-backed API, not native window decorations.
+- **Security defaults** — every `WebContentsView`/popup uses `nodeIntegration: false`,
+  `contextIsolation: true`. Keep new views consistent with this.
 
 ## Packaging / distribution
 

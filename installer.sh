@@ -12,11 +12,11 @@ case "$ARCH" in
 esac
 
 VERSION="${VERSION:-0.2.5}"
-APPIMAGE_URL="${APPIMAGE_URL:-https://github.com/selimaj-dev/linear-linux/releases/download/v${VERSION}/linear-linux-${VERSION}-${ARCH}.AppImage}"
+APPIMAGE_URL="${APPIMAGE_URL:-https://github.com/eboye/linear-linux/releases/download/v${VERSION}/linear-linux-${VERSION}-${ARCH}.AppImage}"
 INSTALL_ROOT="${INSTALL_ROOT:-/opt}"
 INSTALL_DIR="${INSTALL_ROOT}/linear-linux-${VERSION}"
 WRAPPER_PATH="/usr/local/bin/linear"
-DESKTOP_PATH="/usr/share/applications/linear.desktop"
+DESKTOP_PATH="/usr/share/applications/linear-linux.desktop"
 APP_NAME="Linear"
 APP_DIR="${INSTALL_DIR}/squashfs-root"
 
@@ -35,6 +35,11 @@ trap 'rm -rf "${tmpdir}"' EXIT
 echo "Downloading Linear AppImage ${VERSION}..."
 curl -fsSL "${APPIMAGE_URL}" -o "${tmpdir}/linear.AppImage"
 chmod +x "${tmpdir}/linear.AppImage"
+
+echo "Removing previous versions from ${INSTALL_ROOT}..."
+for old_dir in "${INSTALL_ROOT}"/linear-linux-*; do
+  [[ -d "${old_dir}" && "${old_dir}" != "${INSTALL_DIR}" ]] && sudo rm -rf "${old_dir}"
+done
 
 echo "Installing to ${INSTALL_DIR}..."
 sudo mkdir -p "${INSTALL_DIR}"
@@ -61,20 +66,15 @@ sudo tee "${DESKTOP_PATH}" >/dev/null <<EOF
 Type=Application
 Name=${APP_NAME}
 Exec=${WRAPPER_PATH} %U
-Icon=linear
+Icon=linear-linux
 Terminal=false
 Categories=Utility;
 StartupWMClass=linear-linux
 EOF
 
 echo "Installing icons..."
-sudo install -Dm644 "${ICON_SVG}" /usr/share/icons/hicolor/scalable/apps/linear.svg
-sudo install -Dm644 "${ICON_PNG}" /usr/share/icons/hicolor/512x512/apps/linear.png
+sudo install -Dm644 "${ICON_SVG}" /usr/share/icons/hicolor/scalable/apps/linear-linux.svg
+sudo install -Dm644 "${ICON_PNG}" /usr/share/icons/hicolor/512x512/apps/linear-linux.png
 sudo gtk-update-icon-cache -f /usr/share/icons/hicolor || true
-
-echo "Configuring chrome sandbox"
-
-sudo chown root:root /opt/Linear/chrome-sandbox || true
-sudo chmod 4755 /opt/Linear/chrome-sandbox || true
 
 echo "Linear ${VERSION} installed. Launch with: ${WRAPPER_PATH}"

@@ -7,14 +7,14 @@ A linux port of <a href="https://linear.app/">linear.app</a>
 </p>
 
 <p align="center">
-<img alt="GH-rel ver" src="https://img.shields.io/github/v/release/kleo-dev/linear-linux?color=%23f5304c">
+<img alt="GH-rel ver" src="https://img.shields.io/github/v/release/eboye/linear-linux?color=%23f5304c">
 </p>
 
 # Install
 Requires `sudo` (for sandbox helper, desktop entry, and icons).
 
 ```bash
-git clone git@github.com:selimaj-dev/linear-linux.git
+git clone git@github.com:eboye/linear-linux.git
 cd linear-linux
 ./installer.sh
 ```
@@ -29,4 +29,4 @@ Development:
 - `npm run build` produces an AppImage that bundles the Linear brand assets for the desktop icon.
 
 # Having an issue?
-Describe your issue [here](https://github.com/selimaj-dev/linear-linux/issues)
+Describe your issue [here](https://github.com/eboye/linear-linux/issues)

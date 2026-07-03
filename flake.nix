@@ -9,13 +9,15 @@
     let
       version = "0.2.5";
 
+      # NOTE: version/hash are auto-patched by .github/workflows/release.yml on every
+      # release cut from this repo; the values below are stale until the next release.
       sources = {
         x86_64-linux = {
-          url = "https://github.com/kleo-dev/linear-linux/releases/download/v${version}/linear-linux-${version}-x86_64.AppImage";
+          url = "https://github.com/eboye/linear-linux/releases/download/v${version}/linear-linux-${version}-x86_64.AppImage";
           hash = "sha256-NBmfXyrmtBccOLLzBiwbkCyA8IGxtY+AQIgAVxfrank="; # x86_64
         };
         aarch64-linux = {
-          url = "https://github.com/kleo-dev/linear-linux/releases/download/v${version}/linear-linux-${version}-arm64.AppImage";
+          url = "https://github.com/eboye/linear-linux/releases/download/v${version}/linear-linux-${version}-arm64.AppImage";
           hash = "sha256-nNDo7cq05as0qoEbd1UkOG+s8PzFZxnovcqLsg11RlU="; # aarch64
         };
       };
@@ -57,8 +59,8 @@
 
             meta = with pkgs.lib; {
               description = "Unofficial Linux desktop client for Linear (linear.app)";
-              homepage = "https://github.com/kleo-dev/linear-linux";
-              license = licenses.isc;
+              homepage = "https://github.com/eboye/linear-linux";
+              license = licenses.asl20;
               platforms = [ "x86_64-linux" "aarch64-linux" ];
               mainProgram = "linear-linux";
             };

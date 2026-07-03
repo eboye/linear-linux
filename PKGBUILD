@@ -6,7 +6,7 @@ pkgver=0.2.5
 pkgrel=1
 pkgdesc="Unofficial Electron-based Linux desktop client for Linear (linear.app)"
 arch=('x86_64' 'aarch64')
-url="https://github.com/selimaj-dev/linear-linux"
+url="https://github.com/eboye/linear-linux"
 license=('Apache-2.0')
 depends=('gtk3' 'nss' 'alsa-lib')
 provides=('linear-linux')
@@ -19,6 +19,8 @@ _appimage_aarch64="linear-linux-${pkgver}-arm64.AppImage"
 source_x86_64=("${_appimage_x86_64}::${url}/releases/download/v${pkgver}/${_appimage_x86_64}")
 source_aarch64=("${_appimage_aarch64}::${url}/releases/download/v${pkgver}/${_appimage_aarch64}")
 
+# TODO: these checksums are from the previous upstream's release binaries; they will
+# not match until this repo (eboye/linear-linux) has published its own v0.2.5 release.
 sha256sums_x86_64=('34199f5f2ae6b4171c38b2f3062c1b902c80f081b1b58f804088005717eb6a79')
 sha256sums_aarch64=('9cd0e8edcab4e5ab34aa811b775524386facf0fcc56719e8bdca8bb20d754655')
 

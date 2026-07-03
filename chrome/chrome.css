@@ -1,0 +1,92 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, "Segoe UI", Ubuntu, sans-serif;
+  user-select: none;
+}
+
+html, body {
+  height: 100%;
+  background: #1c1c1f;
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  align-items: stretch;
+  height: 40px;
+  background: #1c1c1f;
+  -webkit-app-region: drag;
+}
+
+.tabs {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  -webkit-app-region: no-drag;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 40px;
+  max-width: 200px;
+  color: #9a9aa2;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 1px solid #2a2a2e;
+  cursor: default;
+}
+
+.tab.active {
+  background: #28282c;
+  color: #f2f2f3;
+}
+
+.tab-close {
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.tab-close:hover {
+  background: #3a3a3f;
+}
+
+.drag {
+  flex: 1;
+  -webkit-app-region: drag;
+}
+
+.control {
+  -webkit-app-region: no-drag;
+  border: none;
+  background: transparent;
+  color: #9a9aa2;
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+  cursor: default;
+}
+
+.control:hover {
+  background: #2a2a2e;
+}
+
+.control.close:hover {
+  background: #e5484d;
+  color: #fff;
+}
+
+.window-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+#new-tab {
+  width: 32px;
+}

@@ -61,8 +61,6 @@ jobs:
           prerelease: false
           files: |
             dist/*.AppImage
-            dist/*.deb
-            dist/*.rpm
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
