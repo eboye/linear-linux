@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Linear
+Comment=Unofficial Linux desktop client for Linear (linear.app)
+Exec=python3 /opt/linear-linux-gtk/main.py
+Icon=linear-linux
+Terminal=false
+Categories=Office;ProjectManagement;
+StartupWMClass=app.linear.linux
