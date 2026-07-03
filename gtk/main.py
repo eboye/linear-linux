@@ -127,6 +127,7 @@ class LinearWindow(Adw.ApplicationWindow):
     def setup_webview(self, webview):
         webview.connect('decide-policy', self.on_decide_policy)
         webview.connect('create', self.on_create)
+        webview.connect('context-menu', self.on_context_menu)
         webview.connect('permission-request', self.on_permission_request)
         webview.connect('notify::title', self.on_title_changed)
         webview.connect('enter-fullscreen', lambda *_: (self.fullscreen(), False)[1])
@@ -140,6 +141,41 @@ class LinearWindow(Adw.ApplicationWindow):
         page.set_title('Linear')
         self.tab_view.set_selected_page(page)
         return page
+
+    # For opens we trigger ourselves (context menu, middle-click) rather than WebKit
+    # already navigating somewhere for us — so, unlike on_create()'s tab-creation
+    # branch, this must explicitly load_uri() into whatever it creates.
+    def open_tab_for(self, uri, related_view):
+        new_view = WebKit.WebView(related_view=related_view)
+        self.setup_webview(new_view)
+        new_view.load_uri(uri)
+        page = self.tab_view.append(new_view)
+        page.set_title('Linear')
+        self.tab_view.set_selected_page(page)
+        return new_view
+
+    def open_link(self, uri, related_view):
+        if is_linear_url(uri):
+            self.open_tab_for(uri, related_view)
+        elif is_auth_url(uri):
+            self._create_popup(related_view).load_uri(uri)
+        else:
+            open_externally(uri)
+
+    def on_context_menu(self, webview, context_menu, hit_test_result):
+        if not hit_test_result.context_is_link():
+            return False
+        link_uri = hit_test_result.get_link_uri()
+
+        for item in context_menu.get_items():
+            if item.get_stock_action() == WebKit.ContextMenuAction.OPEN_LINK_IN_NEW_WINDOW:
+                context_menu.remove(item)
+                break
+
+        action = Gio.SimpleAction.new('open-link-new-tab', None)
+        action.connect('activate', lambda *_a: self.open_link(link_uri, webview))
+        context_menu.prepend(WebKit.ContextMenuItem.new_from_gaction(action, 'Open Link in New Tab', None))
+        return False
 
     def on_close_page(self, tab_view, page):
         tab_view.close_page_finish(page, True)
