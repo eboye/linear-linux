@@ -24,6 +24,16 @@ Other distros need the equivalent of `python3-gi`/`python3-gobject`, `gtk4`, `li
 python3 gtk/main.py
 ```
 
+If that fails with `ModuleNotFoundError: No module named 'gi'`, your `python3` is probably a
+pyenv/conda/venv interpreter rather than your system one — PyGObject is installed against the
+system Python via your distro's package manager (the `pacman -S` above), not pip, so an isolated
+interpreter won't see it. Check with `which python3`; if it points outside `/usr/bin`, run the
+system interpreter explicitly instead:
+
+```bash
+/usr/bin/python3 gtk/main.py
+```
+
 ## What works (verified)
 
 - App launches, creates a native `Adw.ApplicationWindow` with a headerbar + tab strip, and loads
