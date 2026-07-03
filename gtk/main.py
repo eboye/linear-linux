@@ -91,11 +91,11 @@ class LinearWindow(Adw.ApplicationWindow):
         new_tab_button.connect('clicked', lambda *_: self.new_tab())
 
         header = Adw.HeaderBar()
+        header.set_title_widget(tab_bar)
         header.pack_start(new_tab_button)
 
         toolbar_view = Adw.ToolbarView()
         toolbar_view.add_top_bar(header)
-        toolbar_view.add_top_bar(tab_bar)
         toolbar_view.set_content(self.tab_view)
         self.set_content(toolbar_view)
 
