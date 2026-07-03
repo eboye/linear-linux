@@ -166,8 +166,9 @@ class LinearWindow(Adw.ApplicationWindow):
         request = navigation_action.get_request()
         uri = request.get_uri() if request else None
 
-        if uri and is_auth_url(uri):
-            return self._create_popup(webview)
+        # linear.app must be checked before is_auth_url: linear.app/login's own path
+        # contains "/login", one of the auth patterns, so checking auth first would
+        # wrongly send Linear's own pages to the popup path instead of a new tab.
         if uri and is_linear_url(uri):
             new_view = WebKit.WebView(related_view=webview)
             self.setup_webview(new_view)
@@ -175,6 +176,8 @@ class LinearWindow(Adw.ApplicationWindow):
             page.set_title('Linear')
             self.tab_view.set_selected_page(page)
             return new_view
+        if uri and is_auth_url(uri):
+            return self._create_popup(webview)
 
         # Unknown/external destination (or a window.open() whose URL isn't set yet) —
         # don't create an in-app view; if we already know the URL, hand it to the
